@@ -16,7 +16,6 @@ class World:
             for j in range(self.h):
                 dict[f'tile_{index}'] = {'props':[{'x': f'{i}'}, {'y': f'{j}'}, {'h': f'{self.map[i][j].h}'}]}
                 index += 1
-        print(dict)
         return dict
 class Generator:
     def __init__(self, w, h):

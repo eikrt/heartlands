@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from flask_cors import CORS
 from environs import Env
 from ..generator import generator
 
@@ -11,6 +12,7 @@ def get_world():
 env = Env()
 env.read_env()
 app = Flask(__name__)
+CORS(app)
 api = Api(app)
 world = get_world()
 @app.route('/')
