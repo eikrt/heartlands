@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS
 from environs import Env
-from ..generator import generator
+from generator import generator
 
 def get_world():
     gen = generator.Generator(64,64)
@@ -16,12 +16,12 @@ CORS(app)
 api = Api(app)
 world = get_world()
 @app.route('/')
-def hello():
-    return "hello"
+def root():
+    return ""
 @app.route('/map')
 def heightmap():
     return world.return_map()
 
 def run():
-    app.run(debug=env('debug'),port=env('PORT'))
+    app.run(host='0.0.0.0', debug=env('debug'),port=env('PORT'))
 

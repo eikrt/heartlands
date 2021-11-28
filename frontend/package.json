@@ -12,5 +12,10 @@
     "@sveltejs/kit": "next",
     "svelte": "^3.44.0"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "lerp": "^1.0.3",
+    "lerpjs": "^1.1.2",
+    "svelte-canvas": "^0.7.1"
+  }
 }
