@@ -10,9 +10,9 @@ services:
       - ./backend/:/usr/src/backend
     ports:
       - 9090:9090
-        #dev-frontend:
-        #build: frontend
-        #volumes:
-        #  - ./frontend/:/usr/src/frontend
-        #ports:
-        # - 3031:3031
+  dev-frontend:
+    build: frontend
+    volumes:
+      - ./frontend/:/usr/src/frontend
+    ports:
+      - 3031:3031
