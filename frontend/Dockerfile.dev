@@ -1,8 +1,7 @@
 FROM node:14-alpine
-
 WORKDIR /usr/src/frontend
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm i
 COPY . .
 RUN npm run build
-CMD ["node", "build/index.js"]
+CMD ["npm", "run", "dev"]
