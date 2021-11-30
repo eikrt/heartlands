@@ -57,7 +57,8 @@
  };
 
         onMount(async() => {
-            fetch("http://localhost:9090/map")
+             const API_URL = 'http://localhost:9090' 
+             fetch(`${API_URL}/map`)
             .then(response => response.json())
             .then(data => {
             apiData.set(data)
