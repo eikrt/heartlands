@@ -30,7 +30,6 @@ const [tiles, setTiles] = useState(null)
     Object.values(tiles).map(t => Object.values(t)
                         .map(
                             v => {
-                             //console.log(v[Object.keys(v)[1]])
                             let interp = (v[Object.keys(v)[2]]).h
                             if ((v[Object.keys(v)[2]]).h < 0) {
                                 sr = sr_water
@@ -58,31 +57,6 @@ const [tiles, setTiles] = useState(null)
                             }
                         
             )) 
-    for (let i = 0; i < tiles.length; i++) {
-        let interp = tiles[i][2].h
-        if (tiles[i][2].h < 0) {
-            sr = sr_water
-            sg = sg_water
-            sb = sb_water
-            tr = tr_water
-            tg = tg_water
-            tb = tb_water
-            interp *= 4
-        }
-        else {
-
-            sr = sr_grass
-            sg = sg_grass
-            sb = sb_grass
-            tr = tr_grass
-            tg = tg_grass
-            tb = tb_grass
-            interp *= 4
-        }
-        context.fillStyle=`rgb(${lerp(sr,tr,interp)},${lerp(sg,tg,interp)},${lerp(sb,tb,interp)})`
-        context.fillRect(tiles[i][0].x*tileSize,tiles[i][1].y*tileSize,tileSize,tileSize)
-
-  }
 
  } 
   useEffect(() => {
@@ -99,7 +73,7 @@ const [tiles, setTiles] = useState(null)
     tiles && draw(context)
         }, 1000);
   return () => clearInterval(interval);
-  }, [])
+  }, [tiles])
   
         return (
                 <canvas width={800} height={600} ref={canvasRef}/>

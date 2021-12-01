@@ -10,11 +10,3 @@ services:
       - ./backend/:/usr/src/backend
     ports:
       - 9090:9090
-  dev-frontend:
-    build:
-      context: frontend
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./frontend/:/usr/src/frontend
-    ports:
-      - 3031:3000
