@@ -1,0 +1,30 @@
+
+h1 {
+       color: white;
+       display: flex;
+       justify-content: center;
+       align-items: center;
+       width:100%;
+}
+body {
+        background-color: black;
+}
+
+.mainCanvasContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+}
+
+.controlPanel {
+    margin: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width:100%;
+}
+.controlButton {
+        background-color: gray;
+        margin: 12px;
+}
