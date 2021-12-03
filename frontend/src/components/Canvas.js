@@ -11,7 +11,8 @@ const [x, setX] = useState(0)
 const [y, setY] = useState(0)
 const step = 32
 const tileSize=16
-const ENDPOINT = process.env.NODE_ENV == 'development' ? 'http://127.0.0.1:5000' : 'https://eikrt.com/heartlands/ws'
+const ENDPOINT = process.env.NODE_ENV == 'development' ? 'ws://127.0.0.1:5000' : 'wss://eikrt.com/heartlands/ws'
+//const ENDPOINT = 'wss://eikrt.com/heartlands/ws/'
 
 const socket = io.connect(ENDPOINT);
 let canvas = null
