@@ -114,8 +114,8 @@ useEffect(() => {
     canvas = canvasRef.current
     context = canvas.getContext('2d')
           const interval = setInterval(() => {
-
-                    socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
+          
+          socket.current.readyState == 'OPEN' && socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
           context.fillStyle = '#000000'
           context.fillRect(0, 0, context.canvas.width, context.canvas.height)
           map && draw(context, map)
