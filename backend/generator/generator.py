@@ -9,7 +9,7 @@ class World:
         self.map = map
         self.w = w
         self.h = h
-        self.ret_size= 64
+        self.ret_size= 128
     def return_map(self, ret_x, ret_y):
         dict = {}
         index = 0
