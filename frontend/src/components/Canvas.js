@@ -6,15 +6,17 @@ import io from 'socket.io-client'
 
 const Canvas = () => {
 const canvasRef = useRef(null)
-const [tiles, setTiles] = useState(null)
+
+const [map, setMap] = useState(null)
 const [x, setX] = useState(0)
 const [y, setY] = useState(0)
 const step = 32
 const tileSize=16
 const ENDPOINT = process.env.NODE_ENV == 'development' ? 'ws://127.0.0.1:5000' : 'wss://eikrt.com/heartlands/ws'
+const socket = useRef(null)
 //const ENDPOINT = 'wss://eikrt.com/heartlands/ws/'
 
-const socket = io.connect(ENDPOINT);
+
 let canvas = null
 let context = null
 const controlUp = () => {
@@ -35,7 +37,7 @@ const controlRight = () => {
         setX(x - step)
 
 }
-const draw = context => {
+const draw = ( context, tiles)  => {
     
     context.fillStyle = '#000000'
     const sr_grass=0, sg_grass = 125, sb_grass = 0
@@ -68,33 +70,55 @@ const draw = context => {
                                     interp *= 4
                             }
                                 context.fillStyle=`rgb(${lerp(sr,tr,interp)},${lerp(sg,tg,interp)},${lerp(sb,tb,interp)})`
-                                context.fillRect(x + (v[Object.keys(v)[0]]).x*tileSize,y + (v[Object.keys(v)[1]]).y*tileSize,tileSize,tileSize)
+                                context.fillRect(x + (v[Object.keys(v)[0]]).x*tileSize, y + (v[Object.keys(v)[1]]).y*tileSize,tileSize,tileSize)
 
 
                             }
                         
             )) 
-
  } 
+
+        /*  socket.addEventListener('open', (event) =>  {
+                console.log("sdf") 
+                open = true
+          })
+*/
+useEffect(() => {
+        
+        socket.current = new WebSocket(ENDPOINT)
+        socket.current.onopen = function (event) {
+                console.log("socket opened")
+                socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
+        }
+        socket.current.onclose = () => {
+                console.log("socket closed")
+        }
+
+
+return () => socket.current.close() 
+}, []) 
+useEffect(() => {
+        if (!socket.current) return;
+
+        socket.current.onmessage = function (event) {
+                const interval = setTimeout(() => {
+                if (event.data !== null) {
+                    setMap(JSON.parse(event.data))
+
+                }
+
+                }, 1000)
+       }
+    }, []);
   useEffect(() => {
     canvas = canvasRef.current
     context = canvas.getContext('2d')
-    let apiCallTime = 100
-    let apiCallChange = 0
-
-           socket.on("map", data => {
-                setTiles(data);
-          });
           const interval = setInterval(() => {
-          apiCallChange += 10
 
-            if (apiCallChange > apiCallTime) {
-                socket.emit("map", {x: -x/tileSize, y: -y/tileSize}) 
-                apiCallChange = 0
-          }
+                    socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
           context.fillStyle = '#000000'
           context.fillRect(0, 0, context.canvas.width, context.canvas.height)
-          tiles && draw(context)
+          map && draw(context, map)
         }, 10);
   return () => clearInterval(interval);
   })
