@@ -9,7 +9,9 @@ h1 {
 body {
         background-color: black;
 }
-
+#scale {
+        width:32px;
+}
 .mainCanvasContainer {
     display: flex;
     justify-content: center;

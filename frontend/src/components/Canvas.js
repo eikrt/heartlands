@@ -1,21 +1,16 @@
 import React, { useRef, useState, useEffect } from 'react'
-import axios from 'axios';
 import lerp from 'lerpjs'
 import '../style/App.css';
-import io from 'socket.io-client'
-
 const Canvas = () => {
 const canvasRef = useRef(null)
-
 const [map, setMap] = useState(null)
 const [x, setX] = useState(0)
 const [y, setY] = useState(0)
+const [scale, setScale] = useState(1)
 const step = 32
 const tileSize=16
-const ENDPOINT = process.env.NODE_ENV == 'development' ? 'ws://127.0.0.1:5000' : 'wss://eikrt.com/heartlands/ws'
+const ENDPOINT = process.env.NODE_ENV == 'development' ? 'ws://127.0.0.1:5000' : 'wss://eikrt.com/heartlands/ws/'
 const socket = useRef(null)
-//const ENDPOINT = 'wss://eikrt.com/heartlands/ws/'
-
 
 let canvas = null
 let context = null
@@ -70,7 +65,7 @@ const draw = ( context, tiles)  => {
                                     interp *= 4
                             }
                                 context.fillStyle=`rgb(${lerp(sr,tr,interp)},${lerp(sg,tg,interp)},${lerp(sb,tb,interp)})`
-                                context.fillRect(x + (v[Object.keys(v)[0]]).x*tileSize, y + (v[Object.keys(v)[1]]).y*tileSize,tileSize,tileSize)
+                                context.fillRect(x + (v[Object.keys(v)[0]]).x*tileSize/scale, y + (v[Object.keys(v)[1]]).y*tileSize/scale,tileSize/scale,tileSize/scale)
 
 
                             }
@@ -78,13 +73,7 @@ const draw = ( context, tiles)  => {
             )) 
  } 
 
-        /*  socket.addEventListener('open', (event) =>  {
-                console.log("sdf") 
-                open = true
-          })
-*/
 useEffect(() => {
-        
         socket.current = new WebSocket(ENDPOINT)
         socket.current.onopen = function (event) {
                 console.log("socket opened")
@@ -115,7 +104,7 @@ useEffect(() => {
     context = canvas.getContext('2d')
           const interval = setInterval(() => {
           
-          socket.current.readyState == 'OPEN' && socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
+          socket.current.readyState === 'OPEN' && socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
           context.fillStyle = '#000000'
           context.fillRect(0, 0, context.canvas.width, context.canvas.height)
           map && draw(context, map)
@@ -133,6 +122,7 @@ useEffect(() => {
                     <button className="controlButton" onClick={controlDown}> down </button>
                     <button className="controlButton" onClick={controlLeft}> left </button>
                     <button className="controlButton" onClick={controlRight}> right </button>
+                    <input type="number" id="scale" value={scale} onChange={(e) => {setScale(e.target.value)}}/>
                     </div>
                 </div>
         );
