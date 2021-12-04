@@ -41,11 +41,11 @@ const draw = ( context, tiles)  => {
     const tr_water = 64, tg_water = 224, tb_water = 208
     let sr = sr_grass, sg = sg_grass, sb = sb_grass
     let tr = tr_grass, tg = tg_grass, tb = tb_grass
-    Object.values(tiles).map(t => Object.values(t)
+    Object.values(tiles)[0].map(t => Object.values(t)
                         .map(
                             v => {
-                            let interp = (v[Object.keys(v)[2]]).h
-                            if ((v[Object.keys(v)[2]]).h < 0) {
+                            let interp = (v[Object.keys(v)])[2].h
+                            if ((v[Object.keys(v)])[2].h < Object.values(tiles)[1].sealevel) {
                                 sr = sr_water
                                 sg = sg_water
                                 sb = sb_water
@@ -65,12 +65,12 @@ const draw = ( context, tiles)  => {
                                     interp *= 4
                             }
                                 context.fillStyle=`rgb(${lerp(sr,tr,interp)},${lerp(sg,tg,interp)},${lerp(sb,tb,interp)})`
-                                context.fillRect(x + (v[Object.keys(v)[0]]).x*tileSize/scale, y + (v[Object.keys(v)[1]]).y*tileSize/scale,tileSize/scale,tileSize/scale)
+                                context.fillRect((x + (v[Object.keys(v)])[0].x*tileSize)/scale, (y + (v[Object.keys(v)])[1].y*tileSize)/scale,tileSize/scale,tileSize/scale)
 
 
                             }
                         
-            )) 
+            ))
  } 
 
 useEffect(() => {
@@ -102,9 +102,14 @@ useEffect(() => {
   useEffect(() => {
     canvas = canvasRef.current
     context = canvas.getContext('2d')
+          const sTime = 100
+          let sChange = 0
           const interval = setInterval(() => {
-          
-          socket.current.readyState === 'OPEN' && socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
+          sChange += 10
+          if (sChange > sTime) {
+                socket.current.readyState === 1 && socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
+                sChange = 0
+             }
           context.fillStyle = '#000000'
           context.fillRect(0, 0, context.canvas.width, context.canvas.height)
           map && draw(context, map)

@@ -16,7 +16,6 @@ world = read_world('dat/world.dat')
 async def map(websocket):
     async for message in websocket:
         data = json.loads(message)
-
         await websocket.send(json.dumps(world.return_map(int(data['x']),int(data['y']))))
 
 async def main():
