@@ -3,24 +3,7 @@ import random
 from scipy.spatial import Voronoi, voronoi_plot_2d
 
 CHUNK_SIZE = 16
-BIOMES = [
-         
 
-            {'name': 'glacier', 'height':4, 'start_y': 0, 'end_y': 2, 'tile_types': ['ice']},
-            {'name': 'tundra', 'height':3, 'start_y': 2, 'end_y': 4, 'tile_types': ['permafrost']},
-            {'name': 'taiga', 'height':3, 'start_y': 4, 'end_y': 6, 'tile_types': ['grass']},
-            {'name': 'forest' , 'height':1, 'start_y': 6, 'end_y': 8, 'tile_types': ['grass']},
-            {'name': 'grasslands', 'height':1, 'start_y': 8, 'end_y': 10, 'tile_types': ['grass']},
-            {'name': 'mountains', 'height':8, 'start_y': 10, 'end_y': 12, 'tile_types': ['stone']},
-            {'name': 'mediterraean', 'height':4, 'start_y': 12, 'end_y': 14, 'tile_types': ['grass']},
-            {'name': 'ocean', 'height':-1, 'start_y': 12, 'end_y': 14, 'tile_types': ['sand']},
-            {'name': 'archipelago', 'height':2, 'start_y': 12, 'end_y': 14, 'tile_types': ['sand']},
-            {'name': 'savannah', 'height':2, 'start_y': 14, 'end_y': 16, 'tile_types': ['grass']},
-            {'name': 'desert', 'height':1, 'start_y': 16, 'end_y': 18, 'tile_types': ['sand']},
-            {'name': 'rock desert', 'height':3, 'start_y': 18, 'end_y': 20, 'tile_types': ['stone']},
-            {'name': 'red desert', 'height':1, 'start_y': 20, 'end_y': 22, 'tile_types': ['sand']},
-            {'name': 'rainforest','height':1, 'start_y': 22, 'end_y': 24, 'tile_types': ['grass']},
-        ]
 class Tile:
     def __init__(self,tile_type, x,y,h, chunk_x, chunk_y):
         self.x = x
@@ -50,7 +33,6 @@ class World:
         for i in range(int(ret_x), int(ret_x) + self.ret_size):
             for j in range(int(ret_y), int(ret_y) + self.ret_size):
                 if i >= 0 and j >= 0 and i < self.w*CHUNK_SIZE-2 and j < self.h*CHUNK_SIZE-2:
-                    print(len(self.map[i]) )
                     height = self.map[i][j].h
                     tile_type = self.map[i][j].tile_type
                 else:
@@ -64,7 +46,27 @@ class World:
 class Generator:
     def __init__(self):
         self.world = None
+
+
     def generate(self, seed, w, h, sealevel, name):
+        biome_num = 12*2
+        biome_variation = 1
+        biomes = [
+    
+            {'name': 'glacier', 'height':2, 'start_y': 0, 'end_y': h/biome_num, 'tile_types': ['ice']},
+            {'name': 'tundra', 'height':1, 'start_y': 1*h/biome_num, 'end_y': 2*h/biome_num, 'tile_types': ['permafrost']},
+            {'name': 'taiga', 'height':2, 'start_y': 2*h/biome_num, 'end_y': 3*h/biome_num, 'tile_types': ['grass']},
+            {'name': 'forest' , 'height':1, 'start_y': 3*h/biome_num, 'end_y': 4*h/biome_num, 'tile_types': ['grass']},
+            {'name': 'grasslands', 'height':1, 'start_y': 4*h/biome_num, 'end_y':5* h/biome_num, 'tile_types': ['grass']},
+            {'name': 'mountains', 'height':4, 'start_y': 5*h/biome_num, 'end_y': 6*h/biome_num, 'tile_types': ['mountain_land']},
+            {'name': 'mediterraean', 'height':2, 'start_y': 6/h/biome_num, 'end_y':7* h/biome_num, 'tile_types': ['coarse_land']},
+            {'name': 'ocean', 'height':-4, 'start_y': 7*h/biome_num, 'end_y': 8*h/biome_num, 'tile_types': ['sand']},
+            {'name': 'archipelago', 'height':-1, 'start_y': 8*h/biome_num, 'end_y': 9*h/biome_num, 'tile_types': ['sand']},
+            {'name': 'savannah', 'height':1, 'start_y': 9*h/biome_num, 'end_y': 10*h/biome_num, 'tile_types': ['grass']},
+            {'name': 'desert', 'height':1, 'start_y': 10*h/biome_num, 'end_y': 11*h/biome_num, 'tile_types': ['sand']},
+            {'name': 'red desert', 'height':1, 'start_y': 12*h/biome_num, 'end_y': 13*h/biome_num, 'tile_types': ['red_sand']},
+            {'name': 'rainforest','height':1, 'start_y': 13*h/biome_num, 'end_y': 14*h/biome_num, 'tile_types': ['grass']},
+        ]
         noise = PerlinNoise()
         noise1 = PerlinNoise(octaves=3,seed=seed)
         map = [[] for x in range((h)*CHUNK_SIZE)]
@@ -75,13 +77,22 @@ class Generator:
         for i in range(w):
             crow = []
             for j in range(h):
-                biome = BIOMES[random.randint(0,len((BIOMES))-1)]
+                biome = biomes[4]
+                for b in biomes:
+                    biome_i = j # choose biome from list, create symmetrical world by biomes
+                    biome_i_with_variation = biome_i + random.randint(-biome_variation, biome_variation)
+                    biome_i_with_variation = j
+                    if biome_i >= h/2:
+                        biome_i_with_variation = h/2 + h/2-biome_i_with_variation
+                    if biome_i_with_variation >= b['start_y'] and biome_i_with_variation <= b['end_y']:
+                        biome = b
+                        break
                 crow.append(Chunk(i,j,biome))
                 for k in range(CHUNK_SIZE):
 
                     row = []
                     for x in range(CHUNK_SIZE):
-                        noise_val = noise1([k/(w*CHUNK_SIZE), x/(h*CHUNK_SIZE)]) * biome['height']
+                        noise_val = noise1([(i*CHUNK_SIZE+k)/(w*CHUNK_SIZE), (j*CHUNK_SIZE+x)/(h*CHUNK_SIZE)]) * biome['height']
                         tile_type = 'water' if -noise_val < sealevel else biome['tile_types'][0]
                         row.append(Tile(tile_type, k, x, -noise_val, i,j  ))
                     map[k+i*CHUNK_SIZE].extend(row)
