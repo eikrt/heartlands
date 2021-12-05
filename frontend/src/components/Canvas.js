@@ -49,7 +49,8 @@ const draw = ( context, tiles)  => {
     const tr_coarse_land= 110, tg_coarse_land= 115, tb_coarse_land= 90
     const sr_sand= 240, sg_sand= 245, sb_sand= 130
     const tr_sand= 85, tg_sand= 85, tb_sand= 50
-    
+    const sr_savannah_land= 200, sg_savannah_land= 220, sb_savannah_land= 90
+    const tr_savannah_land= 120, tg_savannah_land= 120, tb_savannah_land= 90
     const sr_red_sand= 255, sg_red_sand= 255, sb_red_sand= 115
     const tr_red_sand= 130, tg_red_sand= 90, tb_red_sand= 90
     const sr_ice= 200, sg_ice= 220, sb_ice= 215
@@ -111,6 +112,15 @@ const draw = ( context, tiles)  => {
                                     tr = tr_coarse_land
                                     tg = tg_coarse_land
                                     tb = tb_coarse_land
+                                }
+
+                                else if ((v[Object.keys(v)])[3].type == 'savannah_land') {
+                                    sr = sr_savannah_land
+                                    sg = sg_savannah_land
+                                    sb = sb_savannah_land
+                                    tr = tr_savannah_land
+                                    tg = tg_savannah_land
+                                    tb = tb_savannah_land
                                 }
                                 else if ((v[Object.keys(v)])[3].type == 'sand') {
                                     sr = sr_sand
