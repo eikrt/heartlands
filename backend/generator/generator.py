@@ -1,7 +1,25 @@
+# this file is responsible for holding Generator, Tile, Chunk and World classes. World is the interface from where socket server gets the desired
+# chunks of world
+# Generator class generates the world
 import noise
 import math
 import random
 from datetime import datetime
+
+BIOMES = [
+
+    {'name': 'glacier', 'height':1, 'temperature': 5, 'temperature_margin': 5, 'tile_types': ['ice']},
+    {'name': 'tundra', 'height':1, 'temperature': 10,  'temperature_margin': 5,'tile_types': ['permafrost']},
+    {'name': 'taiga', 'height':1, 'temperature': 15, 'temperature_margin': 5,'tile_types': ['grass']},
+    {'name': 'forest' , 'height':1, 'temperature': 20, 'temperature_margin': 5,'tile_types': ['grass']},
+    {'name': 'grasslands', 'height':1, 'temperature': 25, 'temperature_margin': 5, 'tile_types': ['grass']},
+    {'name': 'mediterraean', 'height':1, 'temperature': 25, 'temperature_margin': 5,'tile_types': ['coarse_land']},
+
+    {'name': 'savannah', 'height':1, 'temperature': 30, 'temperature_margin': 5,'tile_types': ['savannah_land']},
+    {'name': 'desert', 'height':1, 'temperature': 35, 'temperature_margin': 5,'tile_types': ['sand']},
+    {'name': 'red desert', 'height':1, 'temperature': 40 , 'temperature_margin': 5, 'tile_types': ['red_sand']},
+    {'name': 'rainforest','height':1, 'temperature': 45, 'temperature_margin': 5, 'tile_types': ['grass']},
+]
 class Tile:
     def __init__(self,tile_type, x,y,h, chunk_x, chunk_y):
         self.x = x
@@ -26,7 +44,7 @@ class World:
         self.name = name
         self.chunk_size = chunk_size
         self.sealevel = sealevel
-    def return_map(self, ret_x, ret_y):
+    def return_map(self, ret_x, ret_y): # return a piece of world, size specified by ret_w and ret_h, location by parameters
         dict = {}
         index = 0
         dict['tiles'] = []
@@ -48,24 +66,9 @@ class Generator:
         self.world = None
 
 
-    def generate(self, seed,  w, h, chunk_size, sealevel, name):
+    def generate(self, seed,  w, h, chunk_size, sealevel, name): # generate world from layers of perlin noise
         start_time = datetime.now()
-        biome_num = 10*2
-        biome_variation = 1
-        biomes = [
-    
-            {'name': 'glacier', 'height':1, 'temperature': 5, 'temperature_margin': 5, 'tile_types': ['ice']},
-            {'name': 'tundra', 'height':1, 'temperature': 10,  'temperature_margin': 5,'tile_types': ['permafrost']},
-            {'name': 'taiga', 'height':1, 'temperature': 15, 'temperature_margin': 5,'tile_types': ['grass']},
-            {'name': 'forest' , 'height':1, 'temperature': 20, 'temperature_margin': 5,'tile_types': ['grass']},
-            {'name': 'grasslands', 'height':1, 'temperature': 25, 'temperature_margin': 5, 'tile_types': ['grass']},
-            {'name': 'mediterraean', 'height':1, 'temperature': 25, 'temperature_margin': 5,'tile_types': ['coarse_land']},
 
-            {'name': 'savannah', 'height':1, 'temperature': 30, 'temperature_margin': 5,'tile_types': ['savannah_land']},
-            {'name': 'desert', 'height':1, 'temperature': 35, 'temperature_margin': 5,'tile_types': ['sand']},
-            {'name': 'red desert', 'height':1, 'temperature': 40 , 'temperature_margin': 5, 'tile_types': ['red_sand']},
-            {'name': 'rainforest','height':1, 'temperature': 45, 'temperature_margin': 5, 'tile_types': ['grass']},
-        ]
         map = [[] for x in range((h)*chunk_size)]
         # create height ma3
         chunk_x = 0
@@ -74,12 +77,12 @@ class Generator:
         chunk_buffer = chunk_size / random.randint(5,6)
         
         # height map 
-        hmap_octaves = 3
-        hmap_persistence = 1
-        hmap_lacunarity = 16
-        hmap_fraq = 8
-        hmap_flatten = 8
-        hmap_base = 0.1
+        hmap_octaves = 3 # perlin parameter
+        hmap_persistence = 1 # perlin parameter
+        hmap_lacunarity = 16 # perlin parameter
+        hmap_fraq = 8 # fraction to scale the noise pattern. For example 2 scales the noise patter to a larger one
+        hmap_flatten = 8 # value to divide perlin output
+        hmap_base = 0.1 # add base to noise
         # large scale terrain changes
         sea_octaves = 16 
         sea_persistence = -0.5
@@ -99,8 +102,8 @@ class Generator:
         mountain_fraq = 8
         mountain_base = 0
         mountain_flatten = 1
-        mountain_threshold = 0.15
-        mountain_acceleration = 8
+        mountain_threshold = 0.15 # accept only values below or over this value
+        mountain_acceleration = 8 # multiply output with this value
 
         # river areas 
         riverarea_octaves = 16
@@ -120,12 +123,14 @@ class Generator:
         river_threshold = 0.0
         river_base = 0.05
         river_acceleration = 1
+
+        # apply layers
         apply_seas = True
         apply_heightmap = True
         apply_mountains = True
         apply_rivers = False 
         apply_water = True
-        print('Creating tiles and biomes...')
+        print('Creating tiles and BIOMES...')
 
         for i in range(w):
             crow = []
@@ -157,8 +162,8 @@ class Generator:
                         biome_val += rel
 
                         temp = int(biome_val * 40)
-                        biome = biomes[0]
-                        for b in biomes:
+                        biome = BIOMES[0]
+                        for b in BIOMES:
                             if temp > b['temperature'] - b['temperature_margin'] and temp < b['temperature'] + b['temperature_margin']:
                                 biome = b
                                 break

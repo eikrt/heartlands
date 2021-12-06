@@ -1,3 +1,5 @@
+# server file is responsible for serving world via socket connection
+
 import asyncio
 import websockets
 import json

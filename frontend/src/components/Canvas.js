@@ -1,3 +1,5 @@
+// This file holds functionalities to draw and interact with canvas
+
 import React, { useRef, useState, useEffect } from 'react'
 import lerp from 'lerpjs'
 import '../style/App.css';
@@ -35,6 +37,9 @@ const controlRight = () => {
 const draw = ( context, tiles)  => {
     
     context.fillStyle = '#000000'
+
+
+    // tile colors and values towards they will be scaled to
     const sr_grass=125, sg_grass = 65, sb_grass = 48
     const tr_grass = 125, tg_grass = 65, tb_grass = 20
     const sr_water = 240, sg_water = 100, sb_water = 50
