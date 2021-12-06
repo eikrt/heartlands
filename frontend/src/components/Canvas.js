@@ -35,51 +35,51 @@ const controlRight = () => {
 const draw = ( context, tiles)  => {
     
     context.fillStyle = '#000000'
-    const sr_grass=0, sg_grass = 125, sb_grass = 0
-    const tr_grass = 0, tg_grass = 100, tb_grass = 0
-    const sr_water = 0, sg_water = 0, sb_water = 140
-    const tr_water = 64, tg_water = 224, tb_water = 208
+    const sr_grass=125, sg_grass = 65, sb_grass = 48
+    const tr_grass = 125, tg_grass = 65, tb_grass = 20
+    const sr_water = 240, sg_water = 100, sb_water = 50
+    const tr_water = 240, tg_water = 100, tb_water = 30
     
-    const sr_permafrost= 132, sg_permafrost= 115, sb_permafrost= 140
-    const tr_permafrost= 255, tg_permafrost= 255, tb_permafrost= 255
+    const sr_permafrost= 287, sg_permafrost= 3, sb_permafrost= 48
+    const tr_permafrost= 287, tg_permafrost= 3, tb_permafrost= 20
 
-    const sr_mountain_land = 90 , sg_mountain_land= 140, sb_mountain_land= 100
-    const tr_mountain_land= 255, tg_mountain_land= 255, tb_mountain_land= 255
-    const sr_coarse_land= 142, sg_coarse_land= 143, sb_coarse_land= 113
-    const tr_coarse_land= 110, tg_coarse_land= 115, tb_coarse_land= 90
-    const sr_sand= 240, sg_sand= 245, sb_sand= 130
-    const tr_sand= 85, tg_sand= 85, tb_sand= 85
-    const sr_savannah_land= 200, sg_savannah_land= 220, sb_savannah_land= 90
-    const tr_savannah_land= 120, tg_savannah_land= 120, tb_savannah_land= 90
-    const sr_red_sand= 255, sg_red_sand= 255, sb_red_sand= 115
-    const tr_red_sand= 130, tg_red_sand= 90, tb_red_sand= 90
-    const sr_ice= 200, sg_ice= 220, sb_ice= 215
-    const tr_ice= 255, tg_ice= 255, tb_ice= 255
-    let sr = sr_grass, sg = sg_grass, sb = sb_grass
-    let tr = tr_grass, tg = tg_grass, tb = tb_grass
+    const sr_mountain_land = 142 , sg_mountain_land= 31, sb_mountain_land= 148
+    const tr_mountain_land= 142, tg_mountain_land= 31, tb_mountain_land= 148
+    const sr_coarse_land= 69, sg_coarse_land= 12, sb_coarse_land= 52
+    const tr_coarse_land= 69, tg_coarse_land= 12, tb_coarse_land= 52
+    const sr_sand= 61, sg_sand= 95, sb_sand= 80
+    const tr_sand= 61, tg_sand= 75, tb_sand= 60
+    const sr_savannah_land= 51, sg_savannah_land= 36, sb_savannah_land= 50
+    const tr_savannah_land= 51, tg_savannah_land= 36, tb_savannah_land= 62
+    const sr_red_sand= 34, sg_red_sand= 36, sb_red_sand= 62
+    const tr_red_sand= 34, tg_red_sand= 36, tb_red_sand= 62
+    const sr_ice= 193, sg_ice= 36, sb_ice= 78
+    const tr_ice= 78, tg_ice= 36, tb_ice= 100
+    const sr_void = 1, sg_void = 1, sb_void = 0
+    const tr_void = 1, tg_void = 1, tb_void = 0
+    let sr = sr_void, sg =  sg_void, sb = sb_void
+    let tr = tr_void, tg = tg_void, tb = tb_void 
     Object.values(tiles)[0].map(t => Object.values(t)
                         .map(
                             v => {
                             let interp = (v[Object.keys(v)])[2].h
-                            if ((v[Object.keys(v)])[2].h < Object.values(tiles)[1].sealevel) {
-                                sr = sr_water
-                                sg = sg_water
-                                sb = sb_water
-                                tr = tr_water
-                                tg = tg_water
-                                tb = tb_water
-                                interp /= 2
-                            }
-                            else {
+                  
                                     
-                                if ((v[Object.keys(v)])[3].type == 'water') {
+                                if ((v[Object.keys(v)])[3].type == 'void') {
+                                    sr = sr_void
+                                    sg = sg_void
+                                    sb = sb_void
+                                    tr = tr_void
+                                    tg = tg_void
+                                    tb = tb_void
+                                }
+                                else if ((v[Object.keys(v)])[3].type == 'water') {
                                     sr = sr_water
                                     sg = sg_water
                                     sb = sb_water
                                     tr = tr_water
                                     tg = tg_water
                                     tb = tb_water
-                                    interp /= 4
                                 }
                                 else if ((v[Object.keys(v)])[3].type == 'grass') {
                                     sr = sr_grass
@@ -122,6 +122,7 @@ const draw = ( context, tiles)  => {
                                     tr = tr_savannah_land
                                     tg = tg_savannah_land
                                     tb = tb_savannah_land
+
                                 }
                                 else if ((v[Object.keys(v)])[3].type == 'sand') {
                                     sr = sr_sand
@@ -149,9 +150,8 @@ const draw = ( context, tiles)  => {
                                     tb = tb_red_sand
 
                                 }
-                                    interp *= 1
-                            }
-                                context.fillStyle=`rgb(${lerp(sr,tr,interp)},${lerp(sg,tg,interp)},${lerp(sb,tb,interp)})`
+                                interp = interp
+                                context.fillStyle=`hsl(${lerp(sr,tr,interp)},${lerp(sg,tg,interp)}%,${lerp(sb,tb,interp)}%)`
                                 context.fillRect((x + (v[Object.keys(v)])[0].x*tileSize)/scale, (y + (v[Object.keys(v)])[1].y*tileSize)/scale,tileSize/scale,tileSize/scale)
 
 
