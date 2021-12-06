@@ -44,7 +44,8 @@ or <br>
 ```pm2 server.py```
 
 Time to start frontend. Navigate yourself to frontend directory and<br> 
-```npm run start``` if you want to test or develop,<br>
+```npm run start```<br>
+if you want to test or develop,<br>
 ```npm run build```<br>
 if you want to deploy.
 

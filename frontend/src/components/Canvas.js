@@ -205,16 +205,24 @@ useEffect(() => {
   })
        return (
                 <div>
+
                     <div className="mainCanvasContainer">
-                        <canvas className="mainCanvas" width={window.innerWidth} height={window.innerHeight} ref={canvasRef}/>
+                        <canvas className="mainCanvas" width={window.innerWidth-128} height={window.innerHeight} ref={canvasRef}/>
                     </div>
                     <div className="controlPanel">
 
-                    <button className="controlButton" onClick={controlUp}> up </button>
-                    <button className="controlButton" onClick={controlDown}> down </button>
-                    <button className="controlButton" onClick={controlLeft}> left </button>
-                    <button className="controlButton" onClick={controlRight}> right </button>
-                    <input type="number" id="scale" value={scale} onChange={(e) => {setScale(e.target.value)}}/>
+                        <button className="controlButton" onClick={controlUp}> up </button>
+                        <button className="controlButton" onClick={controlDown}> down </button>
+                        <button className="controlButton" onClick={controlLeft}> left </button>
+                        <button className="controlButton" onClick={controlRight}> right </button>
+                        <input type="number" id="scale" value={scale} onChange={(e) => {setScale(e.target.value)}}/>
+                    </div>
+                    <div className="infoPanel">
+                        <div className="worldInfoPanel">
+                            <h2>World Info</h2>
+                            <h3>Name: {map && Object.values(map)[1].name}</h3>
+                            <h3>Population: 0</h3>
+                        </div>
                     </div>
                 </div>
         );

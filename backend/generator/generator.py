@@ -80,8 +80,7 @@ class Generator:
         chunk_x = 0
         chunk_y = 0
         chunks = []
-        chunk_buffer = chunk_size / 5
-        border_freq = 0
+        chunk_buffer = chunk_size / random.randint(5,6)
         hmap_octaves = 6
         hmap_persistence = 0.5
         hmap_lacunarity = 2 
@@ -89,9 +88,11 @@ class Generator:
         sea_persistence = -0.5
         sea_lacunarity = 2
         sea_fraq = 4
-        border_octaves = 42
-        border_persistence = 1
+        border_octaves = 8
+        border_persistence = 2
         border_lacunarity = 2
+        border_fraq = 4
+        border_freq = 0.02
         apply_seas = True
         apply_borders = True 
         print('Creating tiles...')
@@ -154,8 +155,8 @@ class Generator:
                                                         base=0) * biome['height'] 
                             tile_type = 'water' if noise_val < sealevel else biome['tile_types'][0]
                             tile_type = map[a_x][a_y].tile_type
-                            border_noise = noise.pnoise2(k/w,
-                                                        x/h,
+                            border_noise = noise.pnoise2(a_x/(w*border_fraq),
+                                                        a_y/(h*border_fraq),
                                                         octaves=border_octaves,
                                                         persistence=border_persistence,
                                                         lacunarity=border_lacunarity,

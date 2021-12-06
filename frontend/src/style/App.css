@@ -18,7 +18,10 @@ body {
     align-items: center;
     width:100%;
 }
+.mainCanvas {
 
+        margin: 32px;
+}
 .controlPanel {
     margin: 24px;
     display: flex;
@@ -26,7 +29,21 @@ body {
     align-items: center;
     width:100%;
 }
+.worldInfoPanel {
+
+        margin:32px;
+        
+}
 .controlButton {
         background-color: gray;
         margin: 12px;
+}
+p {
+        color:white;
+}
+h2 {
+        color:white;
+}
+h3 {
+        color:white;
 }
