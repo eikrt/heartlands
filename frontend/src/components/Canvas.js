@@ -6,9 +6,9 @@ const canvasRef = useRef(null)
 const [map, setMap] = useState(null)
 const [x, setX] = useState(0)
 const [y, setY] = useState(0)
-const [scale, setScale] = useState(1)
-const step = 32
-const tileSize=16
+const [scale, setScale] = useState(4)
+const step = 128
+const tileSize=32
 const ENDPOINT = process.env.NODE_ENV == 'development' ? 'ws://127.0.0.1:5000' : 'wss://eikrt.com/heartlands/ws/'
 const socket = useRef(null)
 
@@ -36,7 +36,7 @@ const draw = ( context, tiles)  => {
     
     context.fillStyle = '#000000'
     const sr_grass=0, sg_grass = 125, sb_grass = 0
-    const tr_grass = 140, tg_grass = 70, tb_grass = 20
+    const tr_grass = 0, tg_grass = 100, tb_grass = 0
     const sr_water = 0, sg_water = 0, sb_water = 140
     const tr_water = 64, tg_water = 224, tb_water = 208
     
@@ -48,7 +48,7 @@ const draw = ( context, tiles)  => {
     const sr_coarse_land= 142, sg_coarse_land= 143, sb_coarse_land= 113
     const tr_coarse_land= 110, tg_coarse_land= 115, tb_coarse_land= 90
     const sr_sand= 240, sg_sand= 245, sb_sand= 130
-    const tr_sand= 85, tg_sand= 85, tb_sand= 50
+    const tr_sand= 85, tg_sand= 85, tb_sand= 85
     const sr_savannah_land= 200, sg_savannah_land= 220, sb_savannah_land= 90
     const tr_savannah_land= 120, tg_savannah_land= 120, tb_savannah_land= 90
     const sr_red_sand= 255, sg_red_sand= 255, sb_red_sand= 115
@@ -68,7 +68,7 @@ const draw = ( context, tiles)  => {
                                 tr = tr_water
                                 tg = tg_water
                                 tb = tb_water
-                                interp *= 4
+                                interp /= 2
                             }
                             else {
                                     
@@ -79,6 +79,7 @@ const draw = ( context, tiles)  => {
                                     tr = tr_water
                                     tg = tg_water
                                     tb = tb_water
+                                    interp /= 4
                                 }
                                 else if ((v[Object.keys(v)])[3].type == 'grass') {
                                     sr = sr_grass
@@ -148,7 +149,7 @@ const draw = ( context, tiles)  => {
                                     tb = tb_red_sand
 
                                 }
-                                    interp *= 4
+                                    interp *= 1
                             }
                                 context.fillStyle=`rgb(${lerp(sr,tr,interp)},${lerp(sg,tg,interp)},${lerp(sb,tb,interp)})`
                                 context.fillRect((x + (v[Object.keys(v)])[0].x*tileSize)/scale, (y + (v[Object.keys(v)])[1].y*tileSize)/scale,tileSize/scale,tileSize/scale)
@@ -205,7 +206,7 @@ useEffect(() => {
        return (
                 <div>
                     <div className="mainCanvasContainer">
-                        <canvas className="mainCanvas" width={1280} height={640} ref={canvasRef}/>
+                        <canvas className="mainCanvas" width={window.innerWidth} height={window.innerHeight} ref={canvasRef}/>
                     </div>
                     <div className="controlPanel">
 
