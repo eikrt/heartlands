@@ -11,10 +11,12 @@ FILENAME = 'dat/world.dat'
 def write(world, filename):
     with open(filename, "wb") as outp:
         pickle.dump(world, outp, pickle.HIGHEST_PROTOCOL)
+def generate_world_name():
+    return 'Land of Green'
 def create():
     print(f'Writing world with seed {seed}...')
     gen = generator.Generator()
-    gen.generate(seed, width, height, chunk_size, sealevel, 'Land Of Green')
+    gen.generate(seed, width, height, chunk_size, sealevel, generate_world_name())
     print(f'Writing to file {FILENAME}')
     write(gen.get_world(), FILENAME)
 if __name__ == '__main__':

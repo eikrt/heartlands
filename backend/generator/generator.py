@@ -1,8 +1,7 @@
-from perlin_noise import PerlinNoise
+import noise
+
 import random
 from datetime import datetime
-CHUNK_BUFFER = 4
-BORDER_FREQ = 4
 class Tile:
     def __init__(self,tile_type, x,y,h, chunk_x, chunk_y):
         self.x = x
@@ -22,7 +21,8 @@ class World:
         self.map = map
         self.w = w
         self.h = h
-        self.ret_size= 128
+        self.ret_w = 512
+        self.ret_h = 256
         self.name = name
         self.chunk_size = chunk_size
         self.sealevel = sealevel
@@ -30,9 +30,9 @@ class World:
         dict = {}
         index = 0
         dict['tiles'] = []
-        for i in range(int(ret_x), int(ret_x) + self.ret_size):
-            for j in range(int(ret_y), int(ret_y) + self.ret_size):
-                if i >= 0 and j >= 0 and i < self.w*self.chunk_size-2 and j < self.h*self.chunk_size-2:
+        for i in range(int(ret_x), int(ret_x) + self.ret_w):
+            for j in range(int(ret_y), int(ret_y) + self.ret_h):
+                if i >= 0 and j >= 0 and i < self.w*self.chunk_size and j < self.h*self.chunk_size:
                     height = self.map[i][j].h
                     tile_type = self.map[i][j].tile_type
                 else:
@@ -60,7 +60,7 @@ class Generator:
             {'name': 'forest' , 'height':1, 'start_y': 3*h/biome_num, 'end_y': 4*h/biome_num, 'tile_types': ['grass']},
             {'name': 'grasslands', 'height':1, 'start_y': 4*h/biome_num, 'end_y':5* h/biome_num, 'tile_types': ['grass']},
             {'name': 'mountains', 'height':4, 'start_y': 5*h/biome_num, 'end_y': 6*h/biome_num, 'tile_types': ['mountain_land']},
-            {'name': 'mediterraean', 'height':2, 'start_y': 6/h/biome_num, 'end_y':7* h/biome_num, 'tile_types': ['coarse_land']},
+            {'name': 'mediterraean', 'height':2, 'start_y': 6*h/biome_num, 'end_y':7* h/biome_num, 'tile_types': ['coarse_land']},
 
             {'name': 'savannah', 'height':1, 'start_y': 9*h/biome_num, 'end_y': 10*h/biome_num, 'tile_types': ['savannah_land']},
             {'name': 'desert', 'height':1, 'start_y': 10*h/biome_num, 'end_y': 11*h/biome_num, 'tile_types': ['sand']},
@@ -74,16 +74,31 @@ class Generator:
             ]
         ocean_frequency = 128
         archipelago_frequency = 256
-        noise = PerlinNoise()
-        noise1 = PerlinNoise(octaves=3,seed=seed)
+
         map = [[] for x in range((h)*chunk_size)]
-        # create height map
+        # create height ma3
         chunk_x = 0
         chunk_y = 0
         chunks = []
+        chunk_buffer = chunk_size / 5
+        border_freq = 0
+        hmap_octaves = 6
+        hmap_persistence = 0.5
+        hmap_lacunarity = 2 
+        sea_octaves = 16 
+        sea_persistence = -0.5
+        sea_lacunarity = 2
+        sea_fraq = 4
+        border_octaves = 42
+        border_persistence = 1
+        border_lacunarity = 2
+        apply_seas = True
+        apply_borders = True 
         print('Creating tiles...')
         for i in range(w):
             crow = []
+
+            print((f'{(i/w)*100}%'))
             for j in range(h):
                 biome = biomes[4]
                 for b in biomes:
@@ -103,45 +118,83 @@ class Generator:
                     for x in range(chunk_size):
                         a_x = (i*chunk_size)+k # actual tile coords
                         a_y = (j*chunk_size)+x
-                        noise_val = noise1([(a_x)/(w*chunk_size), (a_y)/(h*chunk_size)]) * biome['height']
+
+                        noise_val = noise.pnoise2(a_x/w,
+                                                    a_y/h,
+                                                    octaves=hmap_octaves,
+                                                    persistence=hmap_persistence,
+                                                    lacunarity=hmap_lacunarity,
+                                                    repeatx=w*chunk_size,
+                                                    repeaty=h*chunk_size,
+                                                    base=0) * biome['height']
                         tile_type = biome['tile_types'][0]
-                        row.append(Tile(tile_type, k, x, -noise_val, i,j  ))
+                        row.append(Tile(tile_type, k, x, noise_val, i,j  ))
                     map[k+i*chunk_size].extend(row)
             chunks.append(crow)
-        print('Applying water and biome gradient...')            
-        for i in range(w):
-            for j in range(h):
-                for k in range(chunk_size):
-                    for x in range(chunk_size):
+        print('Applying water and biome gradient...')
+        if apply_borders:
+            for i in range(w):
+                if i != 0:
+                    print((f'{(i/w)*100}%'))
+                for j in range(h):
+                    for k in range(chunk_size):
+                        for x in range(chunk_size):
 
-                        biome = chunks[i][j].biome
-                        a_x = (i*chunk_size)+k # actual tile coords
-                        a_y = (j*chunk_size)+x
+                            biome = chunks[i][j].biome
+                            a_x = (i*chunk_size)+k # actual tile coords
+                            a_y = (j*chunk_size)+x
 
-                        noise_val = noise1([(a_x)/(w*chunk_size), (a_y)/(h*chunk_size)]) * biome['height']
-                        
-                        tile_type = 'water' if -noise_val < sealevel else biome['tile_types'][0]
-                        tile_type = map[a_x][a_y].tile_type
-                        if k < CHUNK_BUFFER:
-                            if random.randint(0,BORDER_FREQ) == 1 and i > 0:
-                                tile_type = chunks[i-1][j].biome['tile_types'][0]
-                                map[a_x][a_y].h /= chunks[i-1][j].biome['height']
-                                
-                        if k > chunk_size - CHUNK_BUFFER:
-                            if random.randint(0,BORDER_FREQ) == 1 and i < w-1:
-                                tile_type = chunks[i+1][j].biome['tile_types'][0]
-                                map[a_x][a_y].h /= chunks[i+1][j].biome['height']
+                            noise_val = noise.pnoise2(a_x/w,
+                                                        a_y/h,
+                                                        octaves=hmap_octaves,
+                                                        persistence=hmap_persistence,
+                                                        lacunarity=hmap_lacunarity,
+                                                        repeatx=w*chunk_size,
+                                                        repeaty=h*chunk_size,
+                                                        base=0) * biome['height'] 
+                            tile_type = 'water' if noise_val < sealevel else biome['tile_types'][0]
+                            tile_type = map[a_x][a_y].tile_type
+                            border_noise = noise.pnoise2(k/w,
+                                                        x/h,
+                                                        octaves=border_octaves,
+                                                        persistence=border_persistence,
+                                                        lacunarity=border_lacunarity,
+                                                        repeatx=w*chunk_size,
+                                                        repeaty=h*chunk_size,
+                                                        base=0) * biome['height']
+                            if k < chunk_buffer:
+                                if border_noise > border_freq  and i > 0:
+                                    
+                                    tile_type = chunks[i-1][j].biome['tile_types'][0]
+                                    map[a_x][a_y].h /= chunks[i-1][j].biome['height']
+                                    
+                            if k > chunk_size - chunk_buffer:
+                                if border_noise > border_freq and i < w-1:
+                                    tile_type = chunks[i+1][j].biome['tile_types'][0]
+                                    map[a_x][a_y].h /= chunks[i+1][j].biome['height']
 
-                        if x < CHUNK_BUFFER:
-                            if random.randint(0,BORDER_FREQ) == 1 and j > 0:
-                                tile_type = chunks[i][j-1].biome['tile_types'][0]
-                                map[a_x][a_y].h /= chunks[i][j-1].biome['height']
-                        if x > chunk_size - CHUNK_BUFFER:
-                            if random.randint(0,BORDER_FREQ) == 1 and j < h-1:
-                                tile_type = chunks[i][j+1].biome['tile_types'][0]
-                                map[a_x][a_y].h /= chunks[i][j+1].biome['height']
-                        map[a_x][a_y].tile_type = tile_type
-        
+                            if x < chunk_buffer:
+                                if border_noise > border_freq  and j > 0:
+                                    tile_type = chunks[i][j-1].biome['tile_types'][0]
+                                    map[a_x][a_y].h /= chunks[i][j-1].biome['height']
+                            if x > chunk_size - chunk_buffer:
+                                if border_noise > border_freq  and j < h-1:
+                                    tile_type = chunks[i][j+1].biome['tile_types'][0]
+                                    map[a_x][a_y].h /= chunks[i][j+1].biome['height']
+                            map[a_x][a_y].tile_type = tile_type
+        if apply_seas:
+            for i in range(w*chunk_size):
+                for j in range(h*chunk_size):
+
+                    noise_val = noise.pnoise2(i/(w*sea_fraq),
+                                                j/(h*sea_fraq),
+                                                octaves=sea_octaves,
+                                                persistence=sea_persistence,
+                                                lacunarity=sea_lacunarity,
+                                                repeatx=w*chunk_size,
+                                                repeaty=h*chunk_size,
+                                                base=0) * biome['height']
+                    map[i][j].h = noise_val
         self.world = World(map, w, h, sealevel, chunk_size, name)
         print(f'Generated world {name} in time {datetime.now() - start_time}')
     def get_world(self):
