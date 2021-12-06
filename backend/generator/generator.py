@@ -39,12 +39,14 @@ class World:
         self.map = map
         self.w = w
         self.h = h
-        self.ret_w = 512
-        self.ret_h = 256
+        self.ret_w = 32
+        self.ret_h = 32
         self.name = name
         self.chunk_size = chunk_size
         self.sealevel = sealevel
     def return_map(self, ret_x, ret_y): # return a piece of world, size specified by ret_w and ret_h, location by parameters
+        self.ret_w = 256
+        self.ret_h = 256
         dict = {}
         index = 0
         dict['tiles'] = []
@@ -103,7 +105,7 @@ class Generator:
         mountain_base = 0
         mountain_flatten = 1
         mountain_threshold = 0.15 # accept only values below or over this value
-        mountain_acceleration = 8 # multiply output with this value
+        mountain_acceleration = 3 # multiply output with this value
 
         # river areas 
         riverarea_octaves = 16

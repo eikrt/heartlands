@@ -38,6 +38,12 @@ body {
         background-color: gray;
         margin: 12px;
 }
+.loadScreen {
+        margin:auto;
+        width:50%;
+        text-align:center;
+        
+}
 p {
         color:white;
 }

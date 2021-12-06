@@ -9,6 +9,7 @@ const [map, setMap] = useState(null)
 const [x, setX] = useState(0)
 const [y, setY] = useState(0)
 const [scale, setScale] = useState(4)
+const [receivedPacket, setReceivedPacket] = useState(false)
 const step = 128
 const tileSize=32
 const ENDPOINT = process.env.NODE_ENV == 'development' ? 'ws://127.0.0.1:5000' : 'wss://eikrt.com/heartlands/ws/'
@@ -41,7 +42,7 @@ const draw = ( context, tiles)  => {
 
     // tile colors and values towards they will be scaled to
     const sr_grass=125, sg_grass = 65, sb_grass = 48
-    const tr_grass = 125, tg_grass = 65, tb_grass = 20
+    const tr_grass = 40, tg_grass = 0, tb_grass = 20
     const sr_water = 240, sg_water = 100, sb_water = 50
     const tr_water = 240, tg_water = 100, tb_water = 30
     
@@ -51,13 +52,13 @@ const draw = ( context, tiles)  => {
     const sr_mountain_land = 142 , sg_mountain_land= 31, sb_mountain_land= 148
     const tr_mountain_land= 142, tg_mountain_land= 31, tb_mountain_land= 148
     const sr_coarse_land= 69, sg_coarse_land= 12, sb_coarse_land= 52
-    const tr_coarse_land= 69, tg_coarse_land= 12, tb_coarse_land= 52
+    const tr_coarse_land= 69, tg_coarse_land= 0, tb_coarse_land= 22
     const sr_sand= 61, sg_sand= 95, sb_sand= 80
-    const tr_sand= 61, tg_sand= 75, tb_sand= 60
+    const tr_sand= 61, tg_sand= 15, tb_sand= 50
     const sr_savannah_land= 51, sg_savannah_land= 36, sb_savannah_land= 50
-    const tr_savannah_land= 51, tg_savannah_land= 36, tb_savannah_land= 62
+    const tr_savannah_land= 51, tg_savannah_land= 16, tb_savannah_land= 22
     const sr_red_sand= 34, sg_red_sand= 36, sb_red_sand= 62
-    const tr_red_sand= 34, tg_red_sand= 36, tb_red_sand= 62
+    const tr_red_sand= 34, tg_red_sand= 5, tb_red_sand= 50
     const sr_ice= 193, sg_ice= 36, sb_ice= 78
     const tr_ice= 78, tg_ice= 36, tb_ice= 100
     const sr_void = 1, sg_void = 1, sb_void = 0
@@ -155,7 +156,10 @@ const draw = ( context, tiles)  => {
                                     tb = tb_red_sand
 
                                 }
-                                interp = interp
+                                if (interp > 1.2) { // if tall enough, lerp into white (snow)
+                                    tb = 100
+                                    interp /= 2
+                                }
                                 context.fillStyle=`hsl(${lerp(sr,tr,interp)},${lerp(sg,tg,interp)}%,${lerp(sb,tb,interp)}%)`
                                 context.fillRect((x + (v[Object.keys(v)])[0].x*tileSize)/scale, (y + (v[Object.keys(v)])[1].y*tileSize)/scale,tileSize/scale,tileSize/scale)
 
@@ -183,27 +187,38 @@ useEffect(() => {
 
         socket.current.onmessage = function (event) {
                 const interval = setTimeout(() => {
+
                 if (event.data !== null) {
                     setMap(JSON.parse(event.data))
 
                 }
-
+                setReceivedPacket(true)
                 }, 1000)
        }
     }, []);
   useEffect(() => {
     canvas = canvasRef.current
+
+    if (!canvas) {
+        return
+    }
     context = canvas.getContext('2d')
           const sTime = 100
           let sChange = 0
           const interval = setInterval(() => {
           sChange += 10
           if (sChange > sTime) {
-                socket.current.readyState === 1 && socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
-                sChange = 0
+                if (receivedPacket) {
+                    if (socket.current.readyState === 1 && receivedPacket) {
+                            socket.current.send(JSON.stringify({x: -x/tileSize, y: -y/tileSize}))
+                            setReceivedPacket(false)
+                    }
+                    sChange = 0
+                }
              }
           context.fillStyle = '#000000'
           context.fillRect(0, 0, context.canvas.width, context.canvas.height)
+          
           map && draw(context, map)
         }, 10);
   return () => clearInterval(interval);
@@ -212,7 +227,8 @@ useEffect(() => {
                 <div>
 
                     <div className="mainCanvasContainer">
-                        <canvas className="mainCanvas" width={window.innerWidth-128} height={window.innerHeight} ref={canvasRef}/>
+                     {!map && <div className="loadScreen"><p>Loading...</p></div>}
+               {map && <canvas className="mainCanvas" width={window.innerWidth-128} height={window.innerHeight} ref={canvasRef}/>}
                     </div>
                     <div className="controlPanel">
 
