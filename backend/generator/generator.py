@@ -37,8 +37,9 @@ class Chunk:
         self.biome = biome
 
 class World:
-    def __init__(self,map, w, h, sealevel, chunk_size, name):
+    def __init__(self,map, chunks, w, h, sealevel, chunk_size, name):
         self.map = map
+        self.chunks = chunks
         self.w = w
         self.h = h
         self.ret_w = 256
@@ -46,6 +47,30 @@ class World:
         self.name = name
         self.chunk_size = chunk_size
         self.sealevel = sealevel
+    def return_chunk(self, x, y):
+        dict = {}
+        dict['tiles'] = []
+        index = 0
+        if x < 0 or y < 0 or x > self.w- 1 or y> self.h - 1:
+            return
+        for i in range(self.chunk_size):
+            for j in range(self.chunk_size):
+                chunk = self.chunks[x][y]
+                tile = chunk.tiles[i][j]
+                if i >= 0 and j >= 0 and i < self.chunk_size and j < self.chunk_size:
+                    height = tile.h
+                    tile_type = tile.tile_type
+                else:
+                    height = -1
+                    tile_type = 'void'
+                id = [f'{random.randint(0,9)}' for x in range(8)]
+                tile_id = ''.join(id)
+                dict['tiles'].append({f'tile_{tile_id}':{'props':[{'x': f'{tile.x}'}, {'y': f'{tile.y}'}, {'h': f'{tile.h}'}, {'type': f'{tile_type}'}]}})
+                dict['header'] = 'chunks' 
+
+                index += 1
+        return dict
+
     def return_map(self, ret_x, ret_y): # return a piece of world, size specified by ret_w and ret_h, location by parameters
         dict = {}
         index = 0
@@ -59,12 +84,14 @@ class World:
                     height = -1
                     tile_type = 'void'
                 dict['tiles'].append({f'tile_{index}':{'props':[{'x': f'{i}'}, {'y': f'{j}'}, {'h': f'{height}'}, {'type': f'{tile_type}'}]}})
-                dict['metadata'] = {'sealevel': self.sealevel, 'width': self.w, 'height': self.h, 'name': self.name}
 
                 index += 1
         return dict
-    def return_chunk(self, x, y):
-        pass       
+    def return_metadata(self):
+        dict = {}
+        dict['header'] = 'metadata'
+        dict['metadata'] = {'sealevel': self.sealevel, 'width': self.w, 'height': self.h, 'chunk_size': self.chunk_size, 'name': self.name}
+        return dict
 class Generator:
     def __init__(self):
         self.world = None
@@ -132,7 +159,7 @@ class Generator:
         # apply layers
         apply_seas = True
         apply_heightmap = True
-        apply_mountains = True
+        apply_mountains = False
         apply_rivers = False 
         apply_water = True
         chunk_size_on_list = chunk_size-1
@@ -299,7 +326,7 @@ class Generator:
                         a_y = (j*chunk_size)+x
                         map[a_x][a_y] = chunks[i][j].tiles[k][x]
                         
-        self.world = World(map, w, h, sealevel, chunk_size, name)
+        self.world = World(map, chunks, w, h, sealevel, chunk_size, name)
         print(f'Generated world {name} in time {datetime.now() - start_time}')
     def get_world(self):
         return self.world
