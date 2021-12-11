@@ -113,7 +113,7 @@ const draw = ( context, tiles)  => {
                                     t = targetColors.ice
                                     interp /= 2
                                 }
-                                context.fillStyle=`hsl(${lerp(s.h,t.h,interp)},${lerp(s.s,s.s,interp)}%,${lerp(s.l,s.l,interp)}%)`
+                                context.fillStyle=`hsl(${lerp(s.h,t.h,interp)},${lerp(s.s,t.s,interp)}%,${lerp(s.l,t.l,interp)}%)`
                                 context.fillRect(-x + ( ( vkeys[0].x)*tileSize)/scale, -y + ( + (vkeys[1].y)*tileSize)/scale,tileSize/scale,tileSize/scale)
 
 
