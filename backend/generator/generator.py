@@ -65,7 +65,7 @@ class World:
                     tile_type = 'void'
                 id = [f'{random.randint(0,9)}' for x in range(8)]
                 tile_id = ''.join(id)
-                dict['tiles'].append({f'tile_{tile_id}':{'props':[{'x': f'{tile.x}'}, {'y': f'{tile.y}'}, {'h': f'{tile.h}'}, {'type': f'{tile_type}'}]}})
+                dict['tiles'].append({f'tile_{tile_id}':{'props':[{'x': f'{tile.x}'}, {'y': f'{tile.y}'}, {'h': f'{tile.h}'}, {'type': f'{tile_type}'}, {'id': f'{tile_id}'}]}})
                 dict['header'] = 'chunks' 
 
                 index += 1

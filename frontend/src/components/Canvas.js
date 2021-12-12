@@ -16,6 +16,7 @@ const [y, setY] = useState(0)
 const [ids, setIds] = useState([])
 const [scale, setScale] = useState(4)
 const [metadata, setMetadata] = useState(null)
+const [sendData, setSendData] = useState(false)
 const step = 64
 const tileSize=32
 const defaultChunkSize = 16
@@ -26,23 +27,32 @@ let canvas = null
 let context = null
 // controls
 const controlUp = () => {
+
         setIds([])
+
+        setMap({tiles: []})
         setY(prevState => prevState - step)
 
 }
 
 const controlDown = () => {
+        
         setIds([])
+        
+        setMap({tiles: []})
         setY(prevState => prevState + step)
 }
 
 const controlLeft = () => {
         setIds([])
+        //
+        setMap({tiles: []})
         setX(prevState => prevState - step)
 }
 
 const controlRight = () => {
         setIds([])
+        setMap({tiles: []})
         setX(prevState => prevState + step)
 
 }
@@ -60,6 +70,12 @@ const draw = ( context, tiles)  => {
     mapdata.map(til => Object.values(til)
                         .map(
                             v => {
+
+
+                            const vkeys = (v[Object.keys(v)])
+
+                                    if (Math.round(-x + ( ( vkeys[0].x)*tileSize)/scale) > 0 && Math.round(-x + ( ( vkeys[0].x)*tileSize)/scale) < window.innerWidth  ) {
+
                             const vkeys = (v[Object.keys(v)])
                             let interp = vkeys[2].h
                             const type = vkeys[3].type
@@ -114,9 +130,10 @@ const draw = ( context, tiles)  => {
                                     interp /= 2
                                 }
                                 context.fillStyle=`hsl(${lerp(s.h,t.h,interp)},${lerp(s.s,t.s,interp)}%,${lerp(s.l,t.l,interp)}%)`
-                                context.fillRect(-x + ( ( vkeys[0].x)*tileSize)/scale, -y + ( + (vkeys[1].y)*tileSize)/scale,tileSize/scale,tileSize/scale)
+                                context.fillRect(Math.round(-x + ( ( vkeys[0].x)*tileSize)/scale), Math.round(-y + ( + (vkeys[1].y)*tileSize)/scale),tileSize/scale,tileSize/scale)
 
 
+                            }
                             }
                         
             ))
@@ -198,6 +215,7 @@ useEffect(() => {
 
 // filter unneccesary tiles from map
 useEffect(() => {
+        const tile_ids = []
         if (map) {
                 map.tiles = map.tiles.filter( (tile) => {
                 const coords = (Object.values(tile)[0].props) 
@@ -206,15 +224,48 @@ useEffect(() => {
 
                 const target_y = (y)
                 const target_x = (x)
-                const buffer = 32*(-tileSize/scale) 
-                return tile_y - target_y >= buffer && tile_x - target_x >= buffer && tile_x - target_x <= (metadata.chunk_size * tileSize * renderRange_w + buffer) / scale && tile_y - target_y <= (metadata.chunk_size * tileSize * renderRange_h + buffer) / scale
+                const buffer = 0 // 32*8*(tileSize/scale) 
+                const inBounds = tile_y - target_y >= -buffer && tile_x - target_x >= -buffer && tile_x - target_x <= (metadata.chunk_size * tileSize * renderRange_w + buffer) / scale && tile_y - target_y <= (metadata.chunk_size * tileSize * renderRange_h + buffer) / scale
+                
+                //const isDuplicate = !tile_ids.includes(coords[4].id)
+            /*    const tx = (0 + Math.round(((x/tileSize))/metadata.chunk_size)*scale), ty = (0 + Math.round(((y/tileSize))/metadata.chunk_size)*scale)
+                    if (overBounds) {
+                       
+                                
+                    setIds(prevState => {
+                    return prevState.filter(_ => {
+                        return _[0] !== tx 
+                    })
+                })
+                     }*/
+                return inBounds 
 
                 })
-
     }
 }, [map,x,y, renderRange_w, renderRange_h])
 
+// sending which chunks to get
+useEffect(() => {
+        if (socket.current.readyState === 1 && chunkQueue <= 0 && metadata) {
+            for (let i = -2; i < renderRange_w; i++) {
+                    for (let j = -2; j < renderRange_h; j++) {
 
+                            const tx = (i + Math.round(((x/tileSize))/metadata.chunk_size)*scale), ty = (j + Math.round(((y/tileSize))/metadata.chunk_size)*scale)
+                            if (tx >= 0 && ty >= 0 && !(ids.filter(e => e[0] === tx && e[1] === ty).length > 0)) {
+                                socket.current.send(JSON.stringify({header: 'chunks', x: tx, y: ty}))
+                                    setChunkQueue(prevState => {
+                                            return prevState + 1
+
+                                    })
+                                ids.push([tx, ty])
+                    }
+
+            }
+            
+        }
+     }
+        setSendData(false)
+},[sendData])
 // main loop, etc
   useEffect(() => {
     canvas = canvasRef.current
@@ -222,8 +273,8 @@ useEffect(() => {
     if (!canvas) {
         return
     }
-    context = canvas.getContext('2d')
-          const sTime = 100
+    context = canvas.getContext('2d', {alpha: false}) // alpha off for optimization
+          const sTime = 10
           let sChange = 0
           const checkTime = 1000
           let checkChange = 0
@@ -231,30 +282,12 @@ useEffect(() => {
           sChange += 10
 
           if (sChange > sTime) {
-                    if (socket.current.readyState === 1 && chunkQueue <= 0 && metadata) {
-
-                            for (let i = -renderRange_w/2; i < renderRange_w; i++) {
-                                    for (let j = -renderRange_h/2; j < renderRange_h; j++) {
-                                            const tx = (i + Math.round(((x/tileSize))/metadata.chunk_size)*scale), ty = (j + Math.round(((y/tileSize))/metadata.chunk_size)*scale)
-                                            if (tx >= 0 && ty >= 0 && !(ids.filter(e => e[0] === tx && e[1] === ty).length > 0)) {
-                                                    
-                                                socket.current.send(JSON.stringify({header: 'chunks', x: tx, y: ty}))
-                                                    setChunkQueue(prevState => {
-                                                            return prevState + 1
-
-                                                    })
-                                                ids.push([tx, ty])
-                                    }
-
-                            }
-                            
-                        }
-                       
+                    setSendData(true)
                     sChange = 0
                 }
-             }
           context.fillStyle = '#000000'
-          context.fillRect(0, 0, context.canvas.width, context.canvas.height)
+          
+          //map && map.tiles.length > 2 && context.fillRect(0, 0, context.canvas.width, context.canvas.height)
           map && draw(context, map)
         }, 10);
   return () => clearInterval(interval);
