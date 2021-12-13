@@ -17,9 +17,10 @@ const [ids, setIds] = useState([])
 const [scale, setScale] = useState(4)
 const [metadata, setMetadata] = useState(null)
 const [sendData, setSendData] = useState(false)
-const step = 64
 const tileSize=32
 const defaultChunkSize = 16
+
+const step = tileSize*defaultChunkSize/2
 const ENDPOINT = process.env.NODE_ENV == 'development' ? 'ws://127.0.0.1:5000' : 'wss://eikrt.com/heartlands/ws/'
 const socket = useRef(null)
 
@@ -227,17 +228,6 @@ useEffect(() => {
                 const buffer = 0 // 32*8*(tileSize/scale) 
                 const inBounds = tile_y - target_y >= -buffer && tile_x - target_x >= -buffer && tile_x - target_x <= (metadata.chunk_size * tileSize * renderRange_w + buffer) / scale && tile_y - target_y <= (metadata.chunk_size * tileSize * renderRange_h + buffer) / scale
                 
-                //const isDuplicate = !tile_ids.includes(coords[4].id)
-            /*    const tx = (0 + Math.round(((x/tileSize))/metadata.chunk_size)*scale), ty = (0 + Math.round(((y/tileSize))/metadata.chunk_size)*scale)
-                    if (overBounds) {
-                       
-                                
-                    setIds(prevState => {
-                    return prevState.filter(_ => {
-                        return _[0] !== tx 
-                    })
-                })
-                     }*/
                 return inBounds 
 
                 })
